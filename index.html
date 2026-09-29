@@ -384,6 +384,9 @@ html .ov-body .verdict{margin-top:0}
 .am-player{margin:18px 0 6px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--surface2)}
 .am-player iframe{display:block;width:100%;border:0}
 .feat .am-player{max-width:660px}
+.yt-player{position:relative;aspect-ratio:16/9;width:100%;margin:0 0 18px;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:#000;box-shadow:0 10px 26px rgba(0,0,0,.45)}
+.yt-player iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.feat .yt-player{max-width:660px;margin-top:18px}
 /* maroon band behind the site title */
 .hero{overflow-x:clip}
 .hero h1{position:relative;z-index:0;padding-block:.2em .16em;margin-block:.3em .38em}
@@ -461,6 +464,8 @@ function fmtN(n){n=Number(n)||0;return Number.isInteger(n)?String(n):n.toFixed(1
 function initials(n){return String(n||'?').split(/[\s&]+/).filter(Boolean).slice(0,3).map(function(w){return w[0];}).join('').toUpperCase();}
 var EMBEDS=/^https?:$/.test(location.protocol)&&!/claude|anthropic/i.test(location.hostname);
 function appleEmbed(u){u=safeUrl(u);var m=u.match(/^https:\/\/(?:embed\.)?music\.apple\.com\/(.+)$/i);return m?'https://embed.music.apple.com/'+m[1]:'';}
+function ytId(u){u=safeUrl(u);var m=u.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([A-Za-z0-9_-]{11})/);return m?m[1]:'';}
+function ytBlock(r){var id=ytId(r.video);if(!EMBEDS||!id)return '';return '<div class="yt-player"><iframe title="Video review of '+esc(r.title)+'" src="https://www.youtube-nocookie.com/embed/'+id+'?rel=0" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>';}
 function appleBlock(r){
   var u=safeUrl(r.apple);if(!u)return '';var e=appleEmbed(u);
   if(EMBEDS&&e)return '<div class="am-player"><iframe title="Listen to '+esc(r.title)+' on Apple Music" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" loading="lazy" height="'+(r.kind==='music'?450:175)+'" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="'+esc(e)+'"></iframe></div>';
@@ -621,8 +626,8 @@ function secFeatured(s){
   var r=featuredReview();if(!r)return '';var v=safeUrl(r.video);
   return '<section class="sec" id="featured"><div class="wrap"><div class="sec-head"><h2>'+esc(s.title)+'</h2></div><div class="feat k-'+r.kind+'">'+cover(r)+
    '<div><span class="kind">'+esc(kindLabel(r.kind))+(r.genre?' · '+esc(r.genre):'')+(r.sample?'<em class="sample">Sample</em>':'')+'</span><h3>'+esc(r.title)+'</h3><p class="by">'+byline(r)+(r.meta?' · '+esc(r.meta):'')+'</p>'+
-   scoreHTML(r.score,'lg')+(r.verdict?'<p class="verdict">'+esc(r.verdict)+'</p>':'')+'<div class="body">'+parasLoose(r.body)+'</div>'+
-   '<div class="row">'+(v?'<a class="btn solid" href="'+esc(v)+'" target="_blank" rel="noopener"><span class="play" aria-hidden="true"></span>Watch the review</a>':'')+'<button type="button" class="btn ghost" data-open="'+esc(r.id)+'">Read full review</button>'+(EMBEDS?'':appleBlock(r))+editBtn(r)+'</div>'+(EMBEDS?appleBlock(r):'')+'<div></div></div></div></div></section>';
+   scoreHTML(r.score,'lg')+(r.verdict?'<p class="verdict">'+esc(r.verdict)+'</p>':'')+'<div class="body">'+parasLoose(r.body)+'</div>'+ytBlock(r)+
+   '<div class="row">'+(v&&!ytBlock(r)?'<a class="btn solid" href="'+esc(v)+'" target="_blank" rel="noopener"><span class="play" aria-hidden="true"></span>Watch the review</a>':'')+'<button type="button" class="btn ghost" data-open="'+esc(r.id)+'">Read full review</button>'+(EMBEDS?'':appleBlock(r))+editBtn(r)+'</div>'+(EMBEDS?appleBlock(r):'')+'<div></div></div></div></div></section>';
 }
 function gridHTML(){
   var q=FILTER.q.trim().toLowerCase();
@@ -690,8 +695,8 @@ function openReview(id){
   ov.innerHTML='<div class="ov-panel k-'+r.kind+'"><button class="ov-close" type="button" aria-label="Close review">×</button>'+
    '<div class="ov-head">'+art+'<div class="ov-info"><span class="kind">'+esc(kindLabel(r.kind))+(r.genre?' · '+esc(r.genre):'')+(r.sample?'<em class="sample">Sample</em>':'')+'</span><h3>'+esc(r.title)+'</h3><p class="by">'+byline(r)+'</p>'+
    '<div class="ov-meta">'+(r.meta?'<span>'+esc(r.meta)+'</span>':'')+(fmtDate(r.date)?'<span>Reviewed '+esc(fmtDate(r.date))+'</span>':'')+'</div>'+scoreHTML(r.score,'lg')+'</div></div>'+
-   '<div class="ov-body">'+(r.verdict?'<p class="verdict">'+esc(r.verdict)+'</p>':'')+(r.body&&r.body.trim()!==(r.verdict||'').trim()?'<div class="body">'+parasLoose(r.body)+'</div>':'')+
-   (EMBEDS&&appleEmbed(r.apple)?appleBlock(r):'')+'<div class="row" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">'+(EMBEDS?'':appleBlock(r))+(v?'<a class="btn solid" href="'+esc(v)+'" target="_blank" rel="noopener"><span class="play" aria-hidden="true"></span>Watch on YouTube</a>':(ch?'<a class="btn ghost" href="'+esc(ch)+'" target="_blank" rel="noopener">Video coming soon · visit the channel</a>':''))+editBtn(r)+'</div></div></div>';
+   '<div class="ov-body">'+ytBlock(r)+(r.verdict?'<p class="verdict">'+esc(r.verdict)+'</p>':'')+(r.body&&r.body.trim()!==(r.verdict||'').trim()?'<div class="body">'+parasLoose(r.body)+'</div>':'')+
+   (EMBEDS&&appleEmbed(r.apple)?appleBlock(r):'')+'<div class="row" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">'+(EMBEDS?'':appleBlock(r))+(v?(ytBlock(r)?'':'<a class="btn solid" href="'+esc(v)+'" target="_blank" rel="noopener"><span class="play" aria-hidden="true"></span>Watch on YouTube</a>'):(ch?'<a class="btn ghost" href="'+esc(ch)+'" target="_blank" rel="noopener">Video coming soon · visit the channel</a>':''))+editBtn(r)+'</div></div></div>';
   ov.hidden=false;ov.querySelector('.ov-close').focus();
 }
 function closeReview(){ov.hidden=true;ov.innerHTML='';if(lastFocus&&lastFocus.focus)lastFocus.focus();}
