@@ -1,4 +1,5 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body><title>Unqualified Critique</title>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Unqualified Critique</title>
 <style id="app-css">
 /* Layout: sticky marquee header, marquee-light hero with ticket stubs, poster/sleeve grid of reviews, quiet bands below */
 :root{
@@ -366,6 +367,20 @@ html .top .brand-name{font-size:17px;line-height:1.02;letter-spacing:.03em;white
 .hero-banner .bulbs{background-image:radial-gradient(circle,var(--hb-gilt) 2.6px,transparent 3.2px)}
 .hero.minimal.has-banner .hero-banner{padding-bottom:clamp(28px,4vw,48px)}
 @media (max-width:760px){.hero-banner{padding-top:calc(var(--ih) - 12vw)}}
+/* review pop-up: image top-left, details beside it */
+html .ov-panel{display:block;width:min(820px,100%)}
+.ov-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(16px,3vw,32px);align-items:start;padding:clamp(20px,3vw,32px) clamp(52px,6vw,64px) 0 clamp(18px,3vw,32px)}
+.ov-art{display:block;width:clamp(116px,24vw,230px);height:auto;max-height:340px;object-fit:contain;border-radius:2px;border:1px solid var(--line);box-shadow:0 10px 26px rgba(0,0,0,.45)}
+.ov-gen{width:clamp(116px,24vw,230px)}
+html .ov-gen .cover{height:auto;min-height:0;aspect-ratio:2/3;border-radius:2px;box-shadow:0 10px 26px rgba(0,0,0,.45)}
+html .k-music .ov-gen .cover{aspect-ratio:1}
+.ov-info{min-width:0;padding-top:4px}
+.ov-info h3{font-size:clamp(28px,4.4vw,52px);line-height:.95;margin:8px 0 6px;overflow-wrap:anywhere}
+.ov-info .by{color:var(--muted);margin:0}
+.ov-info .ov-meta{margin:10px 0 14px}
+html .ov-body{padding:clamp(16px,2.4vw,24px) clamp(18px,3vw,32px) clamp(22px,3vw,32px)}
+html .ov-body .verdict{margin-top:0}
+@media (max-width:520px){.ov-head{gap:14px;padding-right:48px}.ov-info .score.lg b{font-size:44px}}
 /* maroon band behind the site title */
 .hero{overflow-x:clip}
 .hero h1{position:relative;z-index:0;padding-block:.2em .16em;margin-block:.3em .38em}
@@ -441,6 +456,7 @@ function lum(h){var c=hexRgb(h).map(function(v){v/=255;return v<=.03928?v/12.92:
 function onColor(h){return lum(h)>.36?'#141418':'#FFFFFF';}
 function fmtN(n){n=Number(n)||0;return Number.isInteger(n)?String(n):n.toFixed(1);}
 function initials(n){return String(n||'?').split(/[\s&]+/).filter(Boolean).slice(0,3).map(function(w){return w[0];}).join('').toUpperCase();}
+function parasLoose(t){return String(t||'').split(/\n+/).map(function(p){return p.trim();}).filter(Boolean).map(function(p){return '<p>'+esc(p)+'</p>';}).join('');}
 function paras(t){return String(t||'').split(/\n\s*\n/).map(function(p){return p.trim();}).filter(Boolean).map(function(p){return '<p>'+esc(p).replace(/\n/g,'<br>')+'</p>';}).join('');}
 function fmtDate(d){if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return '';var x=new Date(d+'T12:00:00');return isNaN(x)?'':x.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});}
 function newId(){return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
@@ -595,7 +611,7 @@ function secFeatured(s){
   var r=featuredReview();if(!r)return '';var v=safeUrl(r.video);
   return '<section class="sec" id="featured"><div class="wrap"><div class="sec-head"><h2>'+esc(s.title)+'</h2></div><div class="feat k-'+r.kind+'">'+cover(r)+
    '<div><span class="kind">'+esc(kindLabel(r.kind))+(r.genre?' · '+esc(r.genre):'')+(r.sample?'<em class="sample">Sample</em>':'')+'</span><h3>'+esc(r.title)+'</h3><p class="by">'+byline(r)+(r.meta?' · '+esc(r.meta):'')+'</p>'+
-   scoreHTML(r.score,'lg')+(r.verdict?'<p class="verdict">'+esc(r.verdict)+'</p>':'')+'<div class="body">'+paras(r.body)+'</div>'+
+   scoreHTML(r.score,'lg')+(r.verdict?'<p class="verdict">'+esc(r.verdict)+'</p>':'')+'<div class="body">'+parasLoose(r.body)+'</div>'+
    '<div class="row">'+(v?'<a class="btn solid" href="'+esc(v)+'" target="_blank" rel="noopener"><span class="play" aria-hidden="true"></span>Watch the review</a>':'')+'<button type="button" class="btn ghost" data-open="'+esc(r.id)+'">Read full review</button>'+editBtn(r)+'</div></div></div></div></section>';
 }
 function gridHTML(){
@@ -659,9 +675,12 @@ function openReview(id){
   var r=S.reviews.find(function(x){return x.id===id;});if(!r)return;
   var v=safeUrl(r.video),ch=safeUrl(S.channel.url);
   lastFocus=document.activeElement;
-  ov.innerHTML='<div class="ov-panel k-'+r.kind+'"><button class="ov-close" type="button" aria-label="Close review">×</button>'+cover(r)+'<div class="ov-body"><span class="kind">'+esc(kindLabel(r.kind))+(r.genre?' · '+esc(r.genre):'')+(r.sample?'<em class="sample">Sample</em>':'')+'</span><h3>'+esc(r.title)+'</h3><p class="by">'+byline(r)+'</p>'+
-   '<div class="ov-meta">'+(r.meta?'<span>'+esc(r.meta)+'</span>':'')+(fmtDate(r.date)?'<span>Reviewed '+esc(fmtDate(r.date))+'</span>':'')+'</div>'+scoreHTML(r.score,'lg')+
-   (r.verdict?'<p class="verdict">'+esc(r.verdict)+'</p>':'')+'<div class="body">'+paras(r.body)+'</div>'+
+  var im=safeImg(r.cover&&r.cover.img);
+  var art=im?'<img class="ov-art" src="'+im+'" alt="'+(r.kind==='music'?'Album cover':'Poster')+' for '+esc(r.title)+'">':'<div class="ov-gen">'+cover(r)+'</div>';
+  ov.innerHTML='<div class="ov-panel k-'+r.kind+'"><button class="ov-close" type="button" aria-label="Close review">×</button>'+
+   '<div class="ov-head">'+art+'<div class="ov-info"><span class="kind">'+esc(kindLabel(r.kind))+(r.genre?' · '+esc(r.genre):'')+(r.sample?'<em class="sample">Sample</em>':'')+'</span><h3>'+esc(r.title)+'</h3><p class="by">'+byline(r)+'</p>'+
+   '<div class="ov-meta">'+(r.meta?'<span>'+esc(r.meta)+'</span>':'')+(fmtDate(r.date)?'<span>Reviewed '+esc(fmtDate(r.date))+'</span>':'')+'</div>'+scoreHTML(r.score,'lg')+'</div></div>'+
+   '<div class="ov-body">'+(r.verdict?'<p class="verdict">'+esc(r.verdict)+'</p>':'')+(r.body&&r.body.trim()!==(r.verdict||'').trim()?'<div class="body">'+parasLoose(r.body)+'</div>':'')+
    '<div class="row" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">'+(v?'<a class="btn solid" href="'+esc(v)+'" target="_blank" rel="noopener"><span class="play" aria-hidden="true"></span>Watch on YouTube</a>':(ch?'<a class="btn ghost" href="'+esc(ch)+'" target="_blank" rel="noopener">Video coming soon · visit the channel</a>':''))+editBtn(r)+'</div></div></div>';
   ov.hidden=false;ov.querySelector('.ov-close').focus();
 }
@@ -915,4 +934,5 @@ function publish(){
   });
 }
 })();
-</script></body></html>
+</script>
+</body></html>
